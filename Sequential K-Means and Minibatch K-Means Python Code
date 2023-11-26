@@ -1,0 +1,186 @@
+2. Sequential K-Means and Minibatch K-Means Python Code
+
+Note: - For Sequential Minibatch K-Means, also we use the same code. We use the MiniBatchKMeans function instead of the KMeans function.
+
+# !pip3 install mpi4py
+import os
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+# import seaborn as sns
+# from mpi4py import MPI
+from sklearn.cluster import KMeans
+# import plotly.express as px
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import statistics
+from sklearn.cluster import Birch
+import time
+from collections import Counter
+from sklearn.cluster import DBSCAN
+# import plotly.express as px
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from random import sample
+# import plotly.io as pio
+pip install -U kaleido
+# import kaleido
+import math
+import numpy as np
+import pandas as pd
+import csv
+import time
+import numpy as np
+import collections
+# from mpi4py import MPI
+from sklearn.cluster import KMeans
+from sklearn.metrics.cluster import adjusted_rand_score
+# pio.renderers
+# import warnings
+# from yellowbrick.cluster import KElbowVisualizer
+# warnings.filterwarnings('ignore')
+#pio.renderers.default = "svg"
+#from plotly.offline import plot, iplot, init_notebook_mode
+#import plotly.graph_objs as go
+#init_notebook_mode(connected=True)
+
+df=pd.read_csv('processed-country-data.csv')
+
+#Display the data of country data
+df
+x_col = ['exports', 'imports', 'income', 'inflation']
+
+#this is the K-Means Model
+sse = []
+k_rng = range(2,7)
+for k in k_rng:
+km = KMeans(n_clusters=k)
+km.fit(df[x_col])
+sse.append(km.inertia_)
+plt.xlabel('K')
+plt.ylabel('Sum of squared error')
+
+#Will get graph for elbow method
+plt.plot(k_rng,sse)
+
+#based on the elbow method clusters
+km = KMeans(n_clusters=4)
+
+#we pridict the data
+y_predicted = km.fit_predict(df[x_col])
+y_predicted
+df['cluster']=y_predicted
+df.head()
+
+#clusters centers
+km.cluster_centers_
+
+#graphical representation of clusters
+fig, frame1 = plt.subplots()
+clusters = km.labels_
+centers = km.cluster_centers_
+plt.scatter(df.iloc[:, 0],
+df.iloc[:, 1],
+c=clusters,
+s=50,
+cmap="viridis")
+plt.scatter(centers[:, 0],
+centers[:, 1],
+c="red",
+s=200,
+alpha=0.8)
+frame1.axes.get_xaxis().set_ticks([])
+frame1.axes.get_yaxis().set_ticks([])
+plt.xlabel("Clusters")
+plt.ylabel("Centers")
+df['label'] = df['GDP_Category']
+df10 = pd.DataFrame(df.loc[df['label'] == "Low"])
+# print(df10)
+frequency = df10.cluster.value_counts()
+print(frequency)
+df11 = pd.DataFrame(df.loc[df['label'] == "Medium"])
+# print(df11)
+frequency = df11.cluster.value_counts()
+print(frequency)
+df12 = pd.DataFrame(df.loc[df['label'] == "High"])
+# print(df11)
+frequency = df12.cluster.value_counts()
+print(frequency)
+df['predicted'] = df['cluster']
+
+import os
+os.makedirs('csv_cluster', exist_ok=True)
+df.to_csv('csv_cluster/out.csv')
+df0 = pd.DataFrame(df.loc[df['label'] == "Low"])
+df0.to_csv('csv_cluster/low.csv')
+df1 = pd.DataFrame(df.loc[df['label'] == "Medium"])
+df1.to_csv('csv_cluster/medium.csv')
+df2 = pd.DataFrame(df.loc[df['label'] == "High"])
+df2.to_csv('csv_cluster/high.csv')
+
+#we will replace the clusters to adjust
+df['predicted'] = df['predicted'].replace([0], 2)
+df['predicted'] = df['predicted'].replace([1], 5)
+df['predicted'] = df['predicted'].replace([3], 1)
+df['predicted'] = df['predicted'].replace([5], 0)
+df['label'] = df['label'].
+map({'Low': 0, 'Medium': 1, 'High': 2})
+
+#Display data
+df
+
+y_test = df.label
+y_pred_class = df.predicted
+dfz = df['label'].value_counts()
+print(dfz)
+
+#confusion MatrixDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+cm = confusion_matrix(y_test, y_pred_class)
+cmd = ConfusionMatrixDisplay(cm, display_labels=
+['Low: 0','Medium: 1','High: 1'])
+cmd.plot()
+
+#Display the precision,recall,f1slope,support
+from sklearn.metrics import classification_report
+
+# Compute classification metrics based
+on the confusion matrix
+print(classification_report(y_test, y_pred_class,
+target_names=['Low: 0','Medium: 1','High: 2']))
+#labels for countries help needed or not
+df['label'].loc[df['label'] == 2 ]= 'Help not needed'
+df['label'].loc[df['label'] == 1 ]= 'Might need help'
+df['label'].loc[df['label'] == 0 ]='Help needed'
+
+import kaleido
+import plotly.express as px
+fig = px.choropleth(df[['country','label']],
+locationmode='country names',
+locations='country',
+title='Needed Help Per Country (World)',
+color_discrete_sequence=["orange", "red",
+"green",'black'],color=df['label'],
+#color_discrete_sequence=px.colors.sequential.Plasma
+#color_discrete_sequence=px.colors.
+divergig.Earth
+color_discrete_map={'Help needed':'Red',
+'Might need help':'Yellow',
+'Help not needed':'Green'} )
+fig.update_geos(fitbounds="locations", visible=True)
+#fig.update_layout(coloraxis_colorbar=
+dict(title=df_labeled2['abel'].name))
+fig.update_layout(legend_title_text='Labels',
+legend_title_side='top',title_pad_l=260,title_y=0.86)
+#fig.write_html("NeededHelpPerCountry(World)kmeans.html")
+#fig.write_image("NeededHelpPerCountry(World)kmeans.png",
+scale=3)
+fig.show(engine='kaleido')
+
+#Display Execution time
+stop = time.time()
+print("Execution Time ", (stop-start))
+
