@@ -1,0 +1,80 @@
+1. Data Preprocessing Python Code
+
+Data Set :- https://www.kaggle.com/datasets/rohan0301/unsupervised -learning-on-country-data
+
+# !pip3 install mpi4py
+import os
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+# import seaborn as sns
+# from mpi4py import MPI
+from sklearn.cluster import KMeans
+# import plotly.express as px
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import statistics
+from sklearn.cluster import Birch
+import time
+from collections import Counter
+from sklearn.cluster import DBSCAN
+# import plotly.express as px
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from random import sample
+# import plotly.io as pio
+pip install -U kaleido
+# import kaleido
+import math
+import numpy as np
+import pandas as pd
+import csv
+import time
+import numpy as np
+import collections
+# from mpi4py import MPI
+from sklearn.cluster import KMeans
+from sklearn.metrics.cluster import adjusted_rand_score
+# pio.renderers
+# import warnings
+# from yellowbrick.cluster import KElbowVisualizer
+# warnings.filterwarnings('ignore')
+#pio.renderers.default = "svg"
+#from plotly.offline import plot, iplot, init_notebook_mode
+#import plotly.graph_objs as go
+#init_notebook_mode(connected=True)
+df=pd.read_csv('Country-data.csv')
+#Display the data of country data
+df
+df = df.sort_values(by='gdpp').reset_index(drop=True)
+# Display the sorted DataFrame
+print(df)
+# Create a scatter plot of the "gdpp" column
+plt.scatter(df.index, df['gdpp'])
+# Add axis labels and a title
+plt.xlabel('Country Index (sorted by GDP per capita)')
+plt.ylabel('GDP per capita')
+plt.title('GDP per Capita by Country')
+# Show the plot
+plt.show()
+# Compute the quantiles of the "gdpp" column
+quantiles = df['gdpp'].quantile([0, 0.33, 0.67, 1])
+# Define the category labels
+categories = ['Low', 'Medium', 'High']
+# Add a new column to the DataFrame with the category labels
+df['GDP_Category'] = pd.cut(df['gdpp'], bins=quantiles,labels=categories)
+# Display the updated DataFrame
+print(df)
+#Display the data after sorting of gdp
+df
+df['GDP_Category'][0] =df['GDP_Category'][1]
+#Data we are droping from the Data
+columns = ['health', 'life_expec', 'total_fer', 'child_mort']
+df.drop(columns, inplace=True, axis=1)
+#Display the data after drop
+#Final data set after sorting gdp and droping data
+df.to_csv('processed-country-data.csv', index=False)
+
