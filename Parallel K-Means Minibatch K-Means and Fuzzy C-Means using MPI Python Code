@@ -1,0 +1,156 @@
+Parallel K-Means Minibatch K-Means and Fuzzy C-Means using MPI Python Code
+
+Note: - For Parallel Minibatch K-Means and Fuzzy C-Means, also we use the same code. We use the MiniBatchKMeans and Fuzzy C-means function instead of the KMeans function.
+
+When Using MPI in AWS Sage Maker, we use the same code for parallel K-means,Minibatch K-Means and Fuzzy C-Means.
+
+
+apt-get install openmpi-bin openmpi-common opensshclient openssh-server libopenmpi-dev
+pip install mpi4py
+import math
+import csv
+import time
+import numpy as np
+import collections
+from mpi4py import MPI
+from sklearn.cluster import KMeans
+from sklearn.metrics.cluster import adjusted_rand_score
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
+global dimensions, num_clusters, num_points,dimensions,data,flag
+num_clusters=4
+
+#Devide data set to further scattering
+def chunkIt(seq, num):
+avg = len(seq) / float(num)
+out = []
+last = 0.0
+while last < len(seq):
+out.append(seq[int(last):int(last + avg)])
+last += avg
+return out
+
+#Count lables for recalculating means of centroids
+def addCounter(counter1, counter2, datatype):
+for item in counter2:
+counter1[item] += counter2[item]
+return counter1
+import pandas as pd
+if rank==0: start_time = time.time() df = pd.read_csv('/content/sample_data/processed-country-data.csv')
+data = df[['exports', 'imports', 'income', 'inflation']].values
+kmeans = KMeans(n_clusters=num_clusters, random_state=0).
+fit(data).labels_
+
+#Initialize centroids matrix
+initial=[]
+for i in range(num_clusters):
+initial.append(data[i])
+initial=np.vstack(initial)
+num_points = len(data)
+#number of rows
+dimensions = len(data[0])
+#number of columns
+#chunks = [ [] for _ in range(size) ]
+#for i, chunk in enumerate(data):
+#chunks[i % size].append(chunk)
+chunks=chunkIt(data,size)
+#deviding data set on parts for further scattering
+else:
+chunks = None initial = None data = None dimensions = None num_points = None cluster= None Q_clust= None num_clusters= None centroid=None
+kmeans= None
+start_time=None
+start_time=comm.bcast(start_time,root=0)
+data=comm.scatter(chunks, root=0)
+num_clusters=comm.bcast(num_clusters,root=0)
+initial=comm.bcast(initial, root = 0)
+flag= True
+while flag==True:
+clusters=[]
+cluster=[]
+dist =np.zeros((len(data),len(initial)))
+for j in range(len(initial)):
+for i in range(len(data)):
+dist[i][j]=np.linalg.norm(initial[j]-data[i])
+for i in range (len(dist)):
+clusters.append(np.argmin(dist[i])+1)
+Q_clusts=collections.Counter(clusters)
+counterSumOp = MPI.Op.Create(addCounter, commute=True)
+totcounter = comm.allreduce(Q_clusts, op=counterSumOp)
+comm.Barrier()
+cluster=comm.gather(clusters, root=0)
+comm.Barrier()
+if rank==0:
+cluster=[item for sublist in cluster for item in sublist]
+centroids=np.zeros((len(initial),len(initial[0])))
+for k in range (1,num_clusters+1):
+indices = [i for i, j in enumerate(clusters)
+if j == k]
+centroids[k-1]=np.divide((np.sum([data[i] for i in
+indices], axis=0)).astype(np.float),totcounter[k])
+centroid=comm.allreduce(centroids,MPI.SUM)
+comm.Barrier()
+if np.all(centroid==initial):
+flag=False
+print ("Execution time %s seconds" % (time.time() -
+start_time))
+else:
+comm.Barrier()
+if rank==0:
+print('adjusted_rand_score',adjusted_rand_score
+(kmeans,cluster))
+kmeans
+df['predicted'] = kmeans
+df
+centroid
+import matplotlib.pyplot as plt
+fig, frame1 = plt.subplots()
+frame1.axes.get_xaxis().set_ticks([])
+frame1.axes.get_yaxis().set_ticks([])
+clusters = kmeans
+centers = centroid
+plt.scatter(df.iloc[:, 0],
+df.iloc[:, 1],
+c=clusters,
+s=50,
+cmap="viridis")
+plt.scatter(centers[:, 0],
+centers[:, 1],
+c="red",
+s=200,
+alpha=0.8)
+plt.xlabel("Data Index")
+plt.ylabel("Import Values")
+data10 = pd.DataFrame(df.loc[df['GDP_Category'] == "Low"])
+# print(data10)
+frequency = data10.predicted.value_counts()
+print(frequency)
+data11 = pd.DataFrame(df.loc[df['GDP_Category'] == "Medium"])
+# print(df11)
+frequency = data11.predicted.value_counts()
+print(frequency)
+data12 = pd.DataFrame(df.loc[df['GDP_Category'] == "High"])
+# print(df11)
+frequency = data12.predicted.value_counts()
+print(frequency)
+df['predicted'] = df['predicted'].replace([1], 4)
+df['predicted'] = df['predicted'].replace([2], 1)
+df['predicted'] = df['predicted'].replace([4,3], 2)
+# data['predicted'] = data['predicted'].replace([5], 0)
+df
+df['label'] = df['GDP_Category'].map({'Low': 0, 'Medium': 1,
+'High': 2})
+df
+
+y_test = df.label
+y_pred_class = df.predicted
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+cm = confusion_matrix(y_test, y_pred_class)
+cmd = ConfusionMatrixDisplay(cm, display_labels=['Low: 0',
+'Medium: 1','High: 1'])
+cmd.plot()
+
+from sklearn.metrics import classification_report
+# Compute classification metrics based on the confusion matrix
+print(classification_report(y_test, y_pred_class, target_names=
+['Low: 0','Medium: 1','High: 2']))
