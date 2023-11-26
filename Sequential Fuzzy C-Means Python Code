@@ -1,0 +1,75 @@
+3. Sequential Fuzzy C-Means Python Code
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+import skfuzzy as fuzz
+import time
+start = time.time()
+
+# Load the country dataset
+df = pd.read_csv('/content/sample_data/processed-country-data.csv')
+# Remove non-numeric columns
+numeric_cols = ['imports', 'exports', 'income', 'inflation']
+data = df[numeric_cols]
+
+# Normalize the data using StandardScaler
+scaler = StandardScaler()
+data_norm = scaler.fit_transform(data)
+
+# Set the number of clusters
+n_clusters = 4
+# Set the fuzzy exponent parameter
+m = 2
+# Set the maximum number of iterations
+max_iter = 100
+# Initialize the fuzzy c-means clustering algorithm
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(data_norm.T,
+n_clusters, m, error=0.005, maxiter=max_iter, init=None)
+# Get the predicted cluster membership for each data point
+cluster_membership = u.argmax(axis=0)
+# Add the predicted clusters to the original dataframe
+df['Cluster'] = cluster_membership
+# Print the number of countries in each cluster
+print(df['Cluster'].value_counts())
+fig, frame1 = plt.subplots()
+clusters = fuzz.cluster.cmeans.labels_
+centers = fuzz.cluster.cmeans.cluster_centers_
+
+plt.scatter(df.iloc[:, 0],
+df.iloc[:, 1],
+c=clusters,
+s=50,
+cmap="viridis")
+plt.scatter(centers[:, 0],
+centers[:, 1],
+c="red",
+s=200,
+alpha=0.8)
+frame1.axes.get_xaxis().set_ticks([])
+frame1.axes.get_yaxis().set_ticks([])
+plt.xlabel("Clusters")
+plt.ylabel("Centers")
+df['label'] = df['GDP_Category']
+df['predicted'] = df['Cluster']
+df
+f['predicted'] = df['predicted'].replace([0], 2)
+df['predicted'] = df['predicted'].replace([1], 5)
+df['predicted'] = df['predicted'].replace([3], 1)
+df['predicted'] = df['predicted'].replace([5], 0)
+df['label'] = df['label'].map({'Low': 0, 'Medium': 1, 'High': 2})
+y_test = df.label
+y_pred_class = df.predicted
+dfz = df['label'].value_counts()
+print(dfz)
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+cm = confusion_matrix(y_test, y_pred_class)
+cmd = ConfusionMatrixDisplay(cm, display_labels=
+['Low: 0','Medium: 1','High: 1'])
+cmd.plot()
+from sklearn.metrics import classification_report
+
+# Compute classification metrics based on the confusion matrix
+print(classification_report(y_test, y_pred_class, target_names= ['Low: 0','Medium: 1','High: 2']))
+stop = time.time()
+print("Execution Time ", (stop-start))
